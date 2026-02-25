@@ -140,6 +140,18 @@
     </section>
   </div>
 
+  <!-- Action Modal (수정 / 삭제 선택) -->
+  <div id="action-overlay" class="modal-overlay hidden">
+    <div class="modal-box">
+      <p id="action-desc" class="action-desc"></p>
+      <div class="modal-actions">
+        <button id="action-edit-btn" class="btn-action-edit">수정</button>
+        <button id="action-delete-btn" class="btn-danger">삭제</button>
+      </div>
+      <button id="action-cancel-btn" class="btn-cancel btn-full">취소</button>
+    </div>
+  </div>
+
   <!-- Delete Confirm Modal -->
   <div id="modal-overlay" class="modal-overlay hidden">
     <div class="modal-box">
@@ -151,9 +163,49 @@
     </div>
   </div>
 
+  <!-- Edit Modal -->
+  <div id="edit-overlay" class="modal-overlay hidden">
+    <div class="modal-box edit-modal-box">
+      <div class="edit-modal-title">내역 수정</div>
+      <form id="edit-form">
+        <div class="form-group">
+          <label>날짜</label>
+          <input type="date" id="edit-date" required />
+        </div>
+        <div class="form-group">
+          <label>구분</label>
+          <div class="type-toggle">
+            <button type="button" class="edit-toggle-btn active" data-type="income">수입</button>
+            <button type="button" class="edit-toggle-btn" data-type="expense">지출</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>카테고리</label>
+          <select id="edit-category" required></select>
+        </div>
+        <div class="form-group">
+          <label>금액</label>
+          <div class="amount-input-wrap">
+            <input type="number" id="edit-amount" placeholder="0" min="0" required />
+            <span class="amount-unit">원</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>메모</label>
+          <input type="text" id="edit-memo" placeholder="선택 입력" maxlength="50" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="edit-cancel" class="btn-cancel">취소</button>
+          <button type="submit" class="btn-action-edit">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div id="toast" class="toast hidden"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/data.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/app.js"></script>

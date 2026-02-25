@@ -1,19 +1,20 @@
 /**
- * data.js - Data layer: LocalStorage CRUD for 가계부 entries
+ * data.js - Data layer: Supabase CRUD for 가계부 entries
  *
- * Storage key: 'gagyebu_entries'
- * Entry schema:
- *   { id, date (YYYY-MM-DD), type ('income'|'expense'), category, amount, memo, createdAt }
+ * Table: entries
+ *   { id, date (YYYY-MM-DD), type ('income'|'expense'), category, amount, memo, created_at }
  */
 
-const STORAGE_KEY = 'gagyebu_entries';
+const SUPABASE_URL = 'https://qnfaapoztwowgkrlozuj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuZmFhcG96dHdvd2drcmxvenVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMDIwMTYsImV4cCI6MjA4NzU3ODAxNn0.pZV619e3yDj5g23KuliKP5VOrTdY_7JaQ4rdSt2v5xc';
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const CATEGORIES = {
   income: ['엄마 월급여', '아빠 월급여'],
   expense: ['식비', '생필품비', '의료비', '세금', '보험', '이자', '기타'],
 };
 
-// Distinct colors for chart slices
 const CATEGORY_COLORS = [
   '#3f51b5', '#2196f3', '#00bcd4', '#4caf50',
   '#ff9800', '#f44336', '#9c27b0', '#009688',
@@ -24,55 +25,76 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
-function loadEntries() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveEntries(entries) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-}
-
-function addEntry({ date, type, category, amount, memo }) {
-  const entries = loadEntries();
-  const entry = {
-    id: generateId(),
-    date,
-    type,
-    category,
-    amount: Number(amount),
-    memo: memo || '',
-    createdAt: Date.now(),
+/** DB row → JS entry (snake_case → camelCase) */
+function rowToEntry(row) {
+  return {
+    id: row.id,
+    date: row.date,
+    type: row.type,
+    category: row.category,
+    amount: row.amount,
+    memo: row.memo || '',
+    createdAt: row.created_at,
   };
-  entries.push(entry);
-  saveEntries(entries);
-  return entry;
 }
 
-function deleteEntry(id) {
-  const entries = loadEntries().filter(e => e.id !== id);
-  saveEntries(entries);
+async function addEntry({ date, type, category, amount, memo }) {
+  const { data, error } = await db
+    .from('entries')
+    .insert({
+      id: generateId(),
+      date,
+      type,
+      category,
+      amount: Number(amount),
+      memo: memo || '',
+      created_at: Date.now(),
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToEntry(data);
+}
+
+async function updateEntry(id, { date, type, category, amount, memo }) {
+  const { data, error } = await db
+    .from('entries')
+    .update({ date, type, category, amount: Number(amount), memo: memo || '' })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToEntry(data);
+}
+
+async function deleteEntry(id) {
+  const { error } = await db.from('entries').delete().eq('id', id);
+  if (error) throw error;
 }
 
 /** Returns entries for a given YYYY-MM month string */
-function getEntriesByMonth(yearMonth) {
-  return loadEntries().filter(e => e.date.startsWith(yearMonth));
+async function getEntriesByMonth(yearMonth) {
+  const { data, error } = await db
+    .from('entries')
+    .select('*')
+    .like('date', yearMonth + '%');
+  if (error) throw error;
+  return data.map(rowToEntry);
 }
 
 /** Returns entries for a given YYYY-MM-DD date string */
-function getEntriesByDate(date) {
-  return loadEntries().filter(e => e.date === date);
+async function getEntriesByDate(date) {
+  const { data, error } = await db
+    .from('entries')
+    .select('*')
+    .eq('date', date);
+  if (error) throw error;
+  return data.map(rowToEntry);
 }
 
-/**
- * Computes monthly totals and per-category sums.
- * Returns { incomeTotal, expenseTotal, balance, incomeByCategory, expenseByCategory }
- */
-function getMonthlySummary(yearMonth) {
-  const entries = getEntriesByMonth(yearMonth);
+/** Computes monthly totals and per-category sums */
+async function getMonthlySummary(yearMonth) {
+  const entries = await getEntriesByMonth(yearMonth);
   let incomeTotal = 0;
   let expenseTotal = 0;
   const incomeByCategory = {};

@@ -550,5 +550,79 @@ html, body {
 
 .toast.hidden { opacity: 0; pointer-events: none; }
 
+/* ===== Edit Modal ===== */
+.edit-modal-box {
+  width: calc(100% - 40px);
+  max-width: 440px;
+  max-height: 85dvh;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.edit-modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.edit-toggle-btn {
+  flex: 1;
+  height: 44px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  color: var(--color-text-secondary);
+  transition: all 0.2s;
+}
+
+.edit-toggle-btn.active[data-type="income"] {
+  background: var(--color-toggle-active-income);
+  border-color: var(--color-income);
+  color: var(--color-income);
+}
+
+.edit-toggle-btn.active[data-type="expense"] {
+  background: var(--color-toggle-active-expense);
+  border-color: var(--color-expense);
+  color: var(--color-expense);
+}
+
+/* 수정/저장 버튼 (modal-actions 내부에서 flex: 1 적용) */
+.btn-action-edit {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: #fff;
+  transition: background 0.2s;
+}
+
+.btn-action-edit:active {
+  background: var(--color-primary-dark);
+}
+
+/* Action modal description */
+.action-desc {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+  word-break: keep-all;
+}
+
+/* Full-width button (취소 버튼 등) */
+.btn-full {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+}
+
 /* ===== Scrollbar (webkit) ===== */
 .tab-content::-webkit-scrollbar { width: 0; }

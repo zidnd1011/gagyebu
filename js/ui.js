@@ -102,7 +102,7 @@ function renderCategoryLegend(container, slices, total) {
 }
 
 /** Group entries by date (descending) and render history items */
-function renderHistory(container, entries, onDelete) {
+function renderHistory(container, entries, onItemClick) {
   container.innerHTML = '';
   if (!entries.length) {
     container.innerHTML = '<div class="empty-msg" style="text-align:center;padding:40px 0;color:#757575;">내역이 없습니다</div>';
@@ -145,7 +145,7 @@ function renderHistory(container, entries, onDelete) {
         </div>
         <span class="history-amount ${e.type}">${e.type === 'expense' ? '-' : '+'}${formatWon(e.amount)}</span>
       `;
-      item.addEventListener('click', () => onDelete(e.id));
+      item.addEventListener('click', () => onItemClick(e));
       group.appendChild(item);
     });
 
